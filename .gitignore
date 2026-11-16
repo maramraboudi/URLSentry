@@ -1,0 +1,33 @@
+# Python
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Data
+data/raw/*
+data/processed/*
+
+# Models
+models/*.joblib
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Jupyter
+.ipynb_checkpoints/
+
+# System
+.DS_Store
+*.db
+
+# Local databases
+data/*.db
+data/*.sqlite3
+*.sqlite
+*.sqlite3
+
+# Local environment configuration
+.env
