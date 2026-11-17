@@ -233,24 +233,3 @@ These artifacts support the analysis and evaluation of the trained classificatio
 The machine learning pipeline, FastAPI backend, SQLite persistence, URLhaus integration, and automated tests have been implemented.
 
 The Streamlit frontend is planned as the next development stage.
-
-## Future Improvements
-
-- Interactive Streamlit cybersecurity dashboard.
-- Advanced analysis visualization.
-- Exportable analysis reports.
-- Enhanced threat intelligence correlation.
-- Additional model evaluation and explainability.
-- Deployment and containerization.
-
-## Author
-
-**Maram Raboudi**
-
-Cybersecurity Engineering Student
-
-GitHub: [@maramraboudi](https://github.com/maramraboudi)
-
----
-
-*URLSentry is an educational cybersecurity project developed to explore machine learning, phishing detection, API development, and threat intelligence integration.*
