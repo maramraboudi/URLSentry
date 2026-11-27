@@ -129,4 +129,8 @@ def predict_url(url):
         "risk_level": risk_level,
         "model_name": config["model_name"],
         "features_analyzed": len(feature_columns),
+        "features": {
+            name: features[name]
+            for name in feature_columns
+        },
     }
