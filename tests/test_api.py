@@ -41,8 +41,31 @@ def test_prediction_endpoint(tmp_path, monkeypatch):
     assert result["features_analyzed"] == 30
     assert len(result["features"]) == 30
     assert result["features"]["hostname_length"] > 0
+    assert result["previously_analyzed"] is False
     assert result["analysis_id"] == 1
     assert "analyzed_at" in result
+
+
+def test_prediction_reports_repeat_ml_analysis(tmp_path, monkeypatch):
+    monkeypatch.setattr(
+        database,
+        "DATABASE_PATH",
+        tmp_path / "repeat_analysis_test.db",
+    )
+
+    first = client.post(
+        "/predict",
+        json={"url": "https://www.google.com"},
+    )
+    second = client.post(
+        "/predict",
+        json={"url": "https://www.google.com"},
+    )
+
+    assert first.status_code == 200
+    assert first.json()["previously_analyzed"] is False
+    assert second.status_code == 200
+    assert second.json()["previously_analyzed"] is True
 
 
 def test_prediction_rejects_ftp():

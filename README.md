@@ -182,7 +182,9 @@ python run_local.py
 Open the frontend at http://127.0.0.1:8501. The API and interactive API docs
 are available at http://127.0.0.1:8000 and http://127.0.0.1:8000/docs.
 The analyzer provides reserved example URLs for quick testing and displays
-the extracted model features with each prediction.
+the extracted model features with each prediction. Prediction results indicate
+whether the exact URL has appeared in ML analysis history; URLhaus results
+indicate whether they came from a previous cached lookup.
 
 On Windows, create and activate the environment with:
 

@@ -95,6 +95,7 @@ def predict(request: URLRequest):
             **result,
             "analysis_id": saved_result["id"],
             "analyzed_at": saved_result["analyzed_at"],
+            "previously_analyzed": saved_result["previously_analyzed"],
         }
 
     except ValueError as error:
