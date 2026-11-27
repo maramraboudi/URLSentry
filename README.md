@@ -133,7 +133,7 @@ source venv/bin/activate
 
 ```bash
 python -m pip install --upgrade pip
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 ### 4. Configure environment variables
@@ -154,11 +154,45 @@ Keep your API key private. Never commit `.env` or expose credentials in screensh
 
 URLhaus integration is optional. The machine learning prediction functionality is independent of this external service.
 
-### 5. Start the API
+### 5. Prepare the prediction model
+
+The trained model is not included in the repository. Download the dataset and
+run the preprocessing, feature-building, splitting, and training scripts before
+analyzing URLs:
 
 ```bash
-uvicorn app.main:app --host 127.0.0.1 --port 8000
+python -m src.data.download_dataset
+python -m src.data.clean_dataset
+python -m src.features.build_features
+python -m src.training.split_dataset
+python -m src.training.train_models
 ```
+
+Training creates `models/best_model.joblib`, which is required by the prediction
+and health endpoints.
+
+### 6. Start the frontend and API
+
+From the repository root, run:
+
+```bash
+python run_local.py
+```
+
+Open the frontend at http://127.0.0.1:8501. The API and interactive API docs
+are available at http://127.0.0.1:8000 and http://127.0.0.1:8000/docs.
+The analyzer provides reserved example URLs for quick testing and displays
+the extracted model features with each prediction.
+
+On Windows, create and activate the environment with:
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+```
+
+The same `python run_local.py` command starts both local services.
 
 ## API Documentation
 
@@ -230,6 +264,7 @@ These artifacts support the analysis and evaluation of the trained classificatio
 
 ## Development Status
 
-The machine learning pipeline, FastAPI backend, SQLite persistence, URLhaus integration, and automated tests have been implemented.
-
-The Streamlit frontend is planned as the next development stage.
+The machine learning pipeline, FastAPI backend, Streamlit frontend, SQLite
+persistence, URLhaus integration, and automated tests are implemented. The
+trained model is generated locally by the training steps above and is not
+committed to the repository.

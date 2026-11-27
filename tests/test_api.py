@@ -39,6 +39,8 @@ def test_prediction_endpoint(tmp_path, monkeypatch):
 
     assert result["prediction"] in ["phishing", "legitimate"]
     assert result["features_analyzed"] == 30
+    assert len(result["features"]) == 30
+    assert result["features"]["hostname_length"] > 0
     assert result["analysis_id"] == 1
     assert "analyzed_at" in result
 
