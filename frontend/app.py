@@ -123,21 +123,47 @@ def render_analyzer():
         else:
             result = api_request("POST", "/predict", json={"url": url.strip()})
             if result is not None:
+                if (
+                    result["url"]
+                    != st.session_state.get("last_analysis_url")
+                ):
+                    st.session_state["urlhaus-consent"] = False
                 st.session_state["last_analysis_url"] = result["url"]
-                if result["is_phishing"]:
-                    st.error(
-                        f'Phishing detected · Risk: {result["risk_level"].title()}'
+
+                with st.container(border=True):
+                    st.subheader("Analysis result")
+                    prediction, risk, score = st.columns(3)
+                    prediction.metric(
+                        "Prediction",
+                        result["prediction"].title(),
                     )
-                else:
-                    st.success(
-                        f'No phishing detected · Risk: {result["risk_level"].title()}'
+                    risk.metric("Risk level", result["risk_level"].title())
+                    score.metric(
+                        "Phishing score",
+                        f'{result["score_percentage"]:.2f}%',
                     )
-                st.metric("Phishing score", f'{result["score_percentage"]:.2f}%')
-                st.caption(
-                    f'Model: {result["model_name"]} · '
-                    f'Threshold: {result["decision_threshold"]:.2%} · '
-                    f'Analysis #{result["analysis_id"]}'
-                )
+                    st.progress(
+                        result["phishing_score"],
+                        text=(
+                            f'Model threshold: '
+                            f'{result["decision_threshold"]:.2%}'
+                        ),
+                    )
+                    if result["previously_analyzed"]:
+                        st.info(
+                            "This exact URL was analyzed before by the "
+                            "URLSentry ML model."
+                        )
+                    else:
+                        st.caption(
+                            "First recorded analysis of this exact URL by "
+                            "the URLSentry ML model."
+                        )
+                    st.caption(
+                        f'Model: {result["model_name"]} · '
+                        f'Analysis #{result["analysis_id"]}'
+                    )
+
                 with st.expander("Features used for this prediction", expanded=True):
                     feature_rows = [
                         {"Feature": name, "Value": value}
@@ -171,10 +197,33 @@ def render_analyzer():
                 },
             )
             if result is not None:
+                if result.get("status") == "unavailable":
+                    st.warning(
+                        "URLhaus could not check this URL; no URLhaus "
+                        "detection result is available."
+                    )
+                elif result.get("cache_hit"):
+                    st.caption(
+                        "Previously checked by URLhaus; displaying the "
+                        "cached result."
+                    )
+                else:
+                    st.caption(
+                        "Checked by URLhaus just now; no earlier cached "
+                        "result was available."
+                    )
+
                 if result.get("matched"):
                     st.error("URLhaus reports a malware-distribution match.")
+                    if result.get("threat"):
+                        st.write(f'Threat type: {result["threat"]}')
+                elif result.get("status") == "not_found":
+                    st.info(
+                        "URLhaus found no matching record. This does not "
+                        "mean the URL is safe."
+                    )
                 else:
-                    st.info("URLhaus did not report a match.")
+                    st.info(result.get("message", "No URLhaus match reported."))
 
 
 def apply_sample():
@@ -206,8 +255,59 @@ st.set_page_config(
     layout="wide",
 )
 
-st.title("URLSentry")
-st.caption("Machine-learning-based phishing URL analysis")
+st.markdown(
+    """
+    <style>
+    .main .block-container {
+        max-width: 1180px;
+        padding-top: 2rem;
+        padding-bottom: 3rem;
+    }
+    .urlsentry-hero {
+        padding: 1.7rem 2rem;
+        margin-bottom: 1.2rem;
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        border-radius: 18px;
+        background: linear-gradient(120deg, #0f172a, #1e3a8a);
+        color: #f8fafc;
+    }
+    .urlsentry-hero .eyebrow {
+        margin: 0 0 0.4rem;
+        color: #bfdbfe;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+    .urlsentry-hero h1 {
+        margin: 0;
+        color: #f8fafc;
+        font-size: 2.4rem;
+    }
+    .urlsentry-hero .subtitle {
+        margin: 0.35rem 0 0;
+        color: #dbeafe;
+    }
+    [data-testid="stMetric"] {
+        padding: 0.85rem 1rem;
+        border: 1px solid rgba(148, 163, 184, 0.24);
+        border-radius: 12px;
+        background: rgba(148, 163, 184, 0.08);
+    }
+    div[data-baseweb="tab-list"] {
+        gap: 0.4rem;
+    }
+    </style>
+    <section class="urlsentry-hero">
+        <p class="eyebrow">URL threat analysis</p>
+        <h1>URLSentry</h1>
+        <p class="subtitle">
+            Inspect suspicious links using URL structure and threat intelligence.
+        </p>
+    </section>
+    """,
+    unsafe_allow_html=True,
+)
 st.session_state.setdefault("url_input", "")
 render_status()
 

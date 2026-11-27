@@ -30,6 +30,21 @@ def test_valid_http_url():
     assert result["url"].startswith("http://")
 
 
+def test_known_legitimate_url_is_classified_as_legitimate():
+    result = predict_url("https://www.google.com")
+
+    assert result["prediction"] == "legitimate"
+    assert result["is_phishing"] is False
+
+
+def test_low_score_url_is_below_threshold_and_low_risk():
+    result = predict_url("https://www.wikipedia.org")
+
+    assert result["phishing_score"] < result["decision_threshold"]
+    assert result["phishing_score"] < 0.05
+    assert result["risk_level"] == "low"
+
+
 def test_empty_url_rejected():
     try:
         validate_url("")

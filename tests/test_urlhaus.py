@@ -108,6 +108,7 @@ def test_successful_result_is_cached(tmp_path, monkeypatch):
     )
 
     assert first_result["status"] == "not_found"
+    assert first_result["cache_hit"] is False
     assert second_result["status"] == "not_found"
     assert second_result["cache_hit"] is True
     assert calls["count"] == 1

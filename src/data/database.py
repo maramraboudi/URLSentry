@@ -91,6 +91,18 @@ def save_analysis(result):
     analyzed_at = datetime.now(timezone.utc).isoformat()
 
     with get_connection() as connection:
+        connection.execute("BEGIN IMMEDIATE")
+        previously_analyzed = connection.execute(
+            """
+            SELECT EXISTS(
+                SELECT 1
+                FROM analyses
+                WHERE url = ?
+            )
+            """,
+            (result["url"],),
+        ).fetchone()[0]
+
         cursor = connection.execute(
             """
             INSERT INTO analyses (
@@ -124,7 +136,9 @@ def save_analysis(result):
             (analysis_id,),
         ).fetchone()
 
-        return dict(row)
+        saved_result = dict(row)
+        saved_result["previously_analyzed"] = bool(previously_analyzed)
+        return saved_result
 
 
 def get_analysis(analysis_id):
